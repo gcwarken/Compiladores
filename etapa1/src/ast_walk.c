@@ -1,8 +1,8 @@
 /*
  * ast_walk.c — Percorrimento da AST: esboço para completar
  *
- * INF01083 — Linguagens de Programação II / Compiladores — 2026/2
- * UFRGS / INF — Prof. Nicolas Maillard (adaptado por Prof. Leandro Wives)
+ * INF01083 — Linguagens de Programação II / Compiladores — 2026/1
+ * UFRGS / INF — Prof. Nicolas Maillard
  *
  * Este arquivo contém um exemplo de função que percorre recursivamente
  * a AST para coletar estatísticas. Ele está INTENCIONALMENTE INCOMPLETO:
@@ -57,7 +57,7 @@ int ast_count_nodes(const ast_node_t *node)
         count += ast_count_nodes(node->children[i]);
 
     /* TODO-E: adicione aqui a contagem recursiva via 'next' */
-    /* count += ast_count_nodes(node->next); */  /* <-- descomente e ajuste */
+    count += ast_count_nodes(node->next);  /* <-- descomente e ajuste */
 
     return count;
 }
@@ -73,8 +73,30 @@ int ast_count_nodes(const ast_node_t *node)
 int ast_count_leaves(const ast_node_t *node)
 {
     /* TODO-F: implementar */
-    (void)node;  /* evita warning de parâmetro não usado — remova ao implementar */
-    return 0;
+    if (node == NULL)
+        return 0;
+        
+    int tem_filho = 0;
+    for (int i = 0; i < AST_MAX_CHILDREN; i++) {
+    	if(node->children[i] != NULL) {
+    		tem_filho = 1;
+    		break;
+    	}
+    }
+    
+    if ((tem_filho == 0) && (node->next == NULL))
+	return 1;
+	
+    int folhas = 1;
+
+    for (int i = 0; i < AST_MAX_CHILDREN; i++) {
+    	folhas += ast_count_leaves(node->children[i]);
+    }
+    
+    folhas += ast_count_leaves(node->next);
+    
+    return folhas;
+
 }
 
 /* -----------------------------------------------------------------------
@@ -93,9 +115,25 @@ static int max(int a, int b) { return (a > b) ? a : b; }
 int ast_max_depth(const ast_node_t *node)
 {
     /* TODO-G: implementar */
-    (void)node;
-    (void)max;   /* evita warning — remova ao implementar */
-    return 0;
+    if (node == NULL)
+    	return 0;
+    	
+    int max_child_depth = -1;
+    	
+    for (int i = 0; i < AST_MAX_CHILDREN; i++) {
+    	max_child_depth = max(max_child_depth, ast_max_depth(node->children[i]));
+    }
+    
+    int current_depth;
+    
+    if (max_child_depth == -1)
+    	current_depth = 0;
+    else
+    	current_depth = 1 + max_child_depth;
+    	
+    int next_depth = ast_max_depth(node->next);
+    
+    return max(current_depth, next_depth);
 }
 
 /* -----------------------------------------------------------------------
