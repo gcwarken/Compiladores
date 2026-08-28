@@ -87,7 +87,7 @@ int ast_count_leaves(const ast_node_t *node)
     if ((tem_filho == 0) && (node->next == NULL))
 	return 1;
 	
-    int folhas = 1;
+    int folhas = 0;
 
     for (int i = 0; i < AST_MAX_CHILDREN; i++) {
     	folhas += ast_count_leaves(node->children[i]);

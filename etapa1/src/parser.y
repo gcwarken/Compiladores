@@ -411,17 +411,17 @@ expr
     | expr TK_OC_AND expr
         {
             /* TODO-C-1: substitua NULL pelo nó correto */
-            $$ = NULL;  /* <-- INCOMPLETO: crie o nó AST_EXPR_BINARY aqui */
-            /* Dica: $$ = ast_new(AST_EXPR_BINARY, "&&", yylineno);
-             *        $$->children[0] = $1;
-             *        $$->children[1] = $3;          */
+            $$ = ast_new(AST_EXPR_BINARY, "&&", yylineno);
+            $$->children[0] = $1;
+            $$->children[1] = $3;
         }
     | expr TK_OC_OR expr
         {
-            /* TODO-C-2: substitua NULL pelo nó correto */
-            $$ = NULL;  /* <-- INCOMPLETO: crie o nó AST_EXPR_BINARY aqui */
+            /* Representa a disjunção e liga as expressões esquerda e direita. */
+            $$ = ast_new(AST_EXPR_BINARY, "||", yylineno);
+            $$->children[0] = $1;
+            $$->children[1] = $3;
         }
-
     /* Operador unário de negação lógica */
     | '!' expr
         {
@@ -494,7 +494,9 @@ expr_list
 expr_list_ne
     : expr
         { $$ = $1; }
-    /* TODO-D: adicione aqui a regra para lista com múltiplos argumentos */
+    | expr_list_ne ',' expr
+        /* $1 é a lista existente; $3 é o novo argumento reconhecido. */
+        { $$ = ast_append($1, $3); }
     ;
 
 /* ------- lvalue (lado esquerdo de atribuição) ------- */
