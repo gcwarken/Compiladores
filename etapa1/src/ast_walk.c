@@ -116,7 +116,7 @@ int ast_max_depth(const ast_node_t *node)
 {
     /* TODO-G: implementar */
     if (node == NULL)
-    	return 0;
+    	return -1;
     	
     int max_child_depth = -1;
     	
