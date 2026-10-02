@@ -408,14 +408,12 @@ char *codegen_expr(codegen_ctx_t *ctx, ast_node_t *expr)
              * exatamente da mesma forma — op_to_tac() já os cobre. Verifique se o
              * caso genérico abaixo já é suficiente ou se precisa de tratamento especial.
              *
-             * Por enquanto, o código abaixo emite TAC_NOP para qualquer operador
-             * (placeholder). Substitua pela emissão correta.
+             * Operadores reconhecidos são emitidos com o opcode correspondente.
+             * Operadores desconhecidos mantêm TAC_NOP e o diagnóstico de erro.
              */
             if (op != TAC_NOP) {
-                /* TODO-E2-B e TODO-E2-C: substitua a linha abaixo */
-                codegen_emit(ctx, TAC_NOP, tmp, left, right);
-                /* pela linha correta: */
-                /* codegen_emit(ctx, op, tmp, left, right); */
+                /* TODO-E2-B e TODO-E2-C: emissão com o opcode reconhecido */
+                codegen_emit(ctx, op, tmp, left, right);
             } else {
                 fprintf(stderr, "[CODEGEN] Operador desconhecido: '%s'\n", expr->value);
                 codegen_emit(ctx, TAC_NOP, tmp, left, right);
