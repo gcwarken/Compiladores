@@ -398,8 +398,6 @@ void codegen_stmt(codegen_ctx_t *ctx, ast_node_t *stmt)
             }
             break;
         }
-                                                                                                                                                                                         /
-
         /* ---------------------------------------------------------------
          * TODO-E3-C: while
          *
@@ -411,9 +409,29 @@ void codegen_stmt(codegen_ctx_t *ctx, ast_node_t *stmt)
          *   Emite goto lbegin
          *   Preenche cond.false_list → emite lend
          * --------------------------------------------------------------- */
-        case AST_WHILE:
-            fprintf(stderr, "[CODEGEN] TODO-E3-C: while não implementado.\n");
+        case AST_WHILE: {
+            char *lbegin = tac_new_label();
+            codegen_emit(ctx, TAC_LABEL, lbegin, NULL, NULL);
+
+            bool_result_t cond = codegen_bool_expr(ctx, stmt->children[0]);
+
+            char *lbody = tac_new_label();
+            patch_list_backpatch(cond.true_list, lbody);
+            patch_list_free(cond.true_list);
+            codegen_emit(ctx, TAC_LABEL, lbody, NULL, NULL);
+            free(lbody);
+
+            codegen_stmt(ctx, stmt->children[1]);
+            codegen_emit(ctx, TAC_JUMP, lbegin, NULL, NULL);
+            free(lbegin);
+
+            char *lend = tac_new_label();
+            patch_list_backpatch(cond.false_list, lend);
+            patch_list_free(cond.false_list);
+            codegen_emit(ctx, TAC_LABEL, lend, NULL, NULL);
+            free(lend);
             break;
+        }
 
         /* ---------------------------------------------------------------
          * TODO-E3-D: for
@@ -431,9 +449,32 @@ void codegen_stmt(codegen_ctx_t *ctx, ast_node_t *stmt)
          *   Emite goto lbegin
          *   Preenche cond.false_list → emite lend
          * --------------------------------------------------------------- */
-        case AST_FOR:
-            fprintf(stderr, "[CODEGEN] TODO-E3-D: for não implementado.\n");
+        case AST_FOR: {
+            codegen_stmt(ctx, stmt->children[0]);
+
+            char *lbegin = tac_new_label();
+            codegen_emit(ctx, TAC_LABEL, lbegin, NULL, NULL);
+
+            bool_result_t cond = codegen_bool_expr(ctx, stmt->children[1]);
+
+            char *lbody = tac_new_label();
+            patch_list_backpatch(cond.true_list, lbody);
+            patch_list_free(cond.true_list);
+            codegen_emit(ctx, TAC_LABEL, lbody, NULL, NULL);
+            free(lbody);
+
+            codegen_stmt(ctx, stmt->children[3]);
+            codegen_stmt(ctx, stmt->children[2]);
+            codegen_emit(ctx, TAC_JUMP, lbegin, NULL, NULL);
+            free(lbegin);
+
+            char *lend = tac_new_label();
+            patch_list_backpatch(cond.false_list, lend);
+            patch_list_free(cond.false_list);
+            codegen_emit(ctx, TAC_LABEL, lend, NULL, NULL);
+            free(lend);
             break;
+        }
 
         default:
             fprintf(stderr, "[CODEGEN] Comando desconhecido tipo=%d\n", stmt->type);
